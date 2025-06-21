@@ -1,8 +1,10 @@
 import { TypewriterEffectSmooth } from "../components/ui/typewriter-effect"
 import { BackgroundBeams } from "../components/ui/background-beams"
 import Navbar from "../components/ui/navbar"
-import { useNavigate } from "react-router"
-import useLogout from "../hooks/useLogout"
+import { useUser } from "@clerk/clerk-react"
+import { Button } from "../components/ui/button"
+import { useNavigate } from "react-router-dom"
+
 const words = [
   {
     text: "From",
@@ -35,7 +37,7 @@ const words = [
 ]
 function Hero() {
   const navigate = useNavigate();
-  const {user} = useLogout();
+  const { user } = useUser();
   return (
     <div>
       <Navbar />
@@ -48,17 +50,20 @@ function Hero() {
         <TypewriterEffectSmooth words={words} />
 
         <div className="w-full sm:w-auto flex flex-col md:flex-row mt-6 space-y-4 md:space-y-0 md:space-x-4">
-          
-            <button className="px-8 py-4  rounded-lg bg-blue-500 border dark:border-white border-transparent font-semibold text-white text-sm z-50" onClick={() => navigate("/home")}>
-              <p className="tracking-wider text-xl capitalize"> Try Now</p>
-            </button>
-            {" "}
-            {
-              !user && <button className="px-8 py-4   rounded-lg font-semibold bg-white text-black border border-black text-sm z-50" onClick={() => navigate("/signup")}>
+          <Button
+            className="px-8 py-4 rounded-lg bg-blue-500 border dark:border-white border-transparent font-semibold text-white text-sm z-50"
+            onClick={() => navigate("/home")}
+          >
+            <p className="tracking-wider text-xl capitalize"> Try Now</p>
+          </Button>{' '}
+          {!user && (
+            <Button
+              className="px-8 py-4 rounded-lg font-semibold bg-white text-black border border-black text-sm z-50"
+              onClick={() => navigate("/signup")}
+            >
               <p className="  tracking-wider text-xl capitalize"> Sign up</p>
-            </button>
-            }
-            
+            </Button>
+          )}
         </div>
 
         <BackgroundBeams />
