@@ -1,6 +1,6 @@
 import { ChangeEvent, useState, useRef, useEffect } from 'react';
 import { Label } from '../components/ui/label';
-import { Textarea } from '../components/ui/textarea';
+import { Textarea } from './ui/textarea';
 import { useFileContext } from '../hooks/useFileContext';
 
 interface TemplateSelectorProps {

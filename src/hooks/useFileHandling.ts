@@ -31,20 +31,22 @@ const useFileHandling = () => {
     setFile(file);
     const reader = new FileReader();
     reader.onload = (event) => {
-      const binaryStr = event.target?.result;
-      const workbook = XLSX.read(binaryStr, { type: 'binary' });
+      const data = event.target?.result;
+      if (data) {
+        const workbook = XLSX.read(data, { type: 'buffer' });
 
-      const sheetName = workbook.SheetNames[0];
-      const worksheet = workbook.Sheets[sheetName];
-      const jsonData = XLSX.utils.sheet_to_json(worksheet) as {
-        [key: string]: string;
-      }[];
+        const sheetName = workbook.SheetNames[0];
+        const worksheet = workbook.Sheets[sheetName];
+        const jsonData = XLSX.utils.sheet_to_json(worksheet) as {
+          [key: string]: string;
+        }[];
 
-      if (jsonData.length > 0) {
-        const extractedHeaders = Object.keys(jsonData[0]);
-        setHeaders(extractedHeaders);
-        setTableData(jsonData);
-        setTemplate('');
+        if (jsonData.length > 0) {
+          const extractedHeaders = Object.keys(jsonData[0]);
+          setHeaders(extractedHeaders);
+          setTableData(jsonData);
+          setTemplate('');
+        }
       }
     };
 
@@ -91,6 +93,33 @@ const useFileHandling = () => {
     }
   };
 
+  const processAndDownload = (template: string, format: 'txt' | 'pdf') => {
+    const processed = tableData.map((row) => {
+      let processedRow = template;
+      headers.forEach((header) => {
+        const regex = new RegExp(`@${header}`, 'g');
+        processedRow = processedRow.replace(regex, row[header] || '');
+      });
+      return processedRow;
+    });
+
+    if (format === 'txt') {
+      const blob = new Blob([processed.join('\n\n')], {
+        type: 'text/plain;charset=utf-8',
+      });
+      saveAs(blob, 'processed_data.txt');
+    } else {
+      const docDefinition = {
+        content: processed.map((p) => ({ text: p })),
+      };
+      pdfMake.createPdf(docDefinition).download('processed_data.pdf');
+    }
+
+    // Also update the context
+    setTemplate(template);
+    setProcessedData(processed);
+  }
+
   const handleResetData = () => {
     setCustomTemplate('');
     setHeaders([]);
@@ -107,6 +136,7 @@ const useFileHandling = () => {
     handleTemplateSelected,
     downloadProcessedData,
     handleResetData,
+    processAndDownload,
   };
 };
 export default useFileHandling;

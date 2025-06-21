@@ -48,7 +48,9 @@ const FileContextProvider = ({ children }: { children: React.ReactNode }) => {
     template,
     setTemplate,
     processedData,
-    setProcessedData,customTemplate, setCustomTemplate
+    setProcessedData,
+    customTemplate,
+    setCustomTemplate
   }
   return (
     <FileContext.Provider value={contextValues}>{children}</FileContext.Provider>

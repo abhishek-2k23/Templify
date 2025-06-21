@@ -11,6 +11,9 @@ importers:
       '@clerk/clerk-react':
         specifier: ^5.32.0
         version: 5.32.0(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
+      '@clerk/themes':
+        specifier: ^2.2.50
+        version: 2.2.50
       '@radix-ui/react-label':
         specifier: ^2.1.1
         version: 2.1.1(@types/react-dom@18.3.5(@types/react@18.3.17))(@types/react@18.3.17)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
@@ -231,6 +234,10 @@ packages:
         optional: true
       react-dom:
         optional: true
+
+  '@clerk/themes@2.2.50':
+    resolution: {integrity: sha512-RsYE9rEw/RJcGvMhPsIiIhXvbZ6robNQdFswQW+Y0lKZB8mX9D+MilPt/T7KWbwmRdK7zQ2LgCLpveUQvxLu2A==}
+    engines: {node: '>=18.17.0'}
 
   '@clerk/types@4.60.1':
     resolution: {integrity: sha512-Lbt0/Q9W9BJtGz1IITdmeqal7y1zp9EaxOEMvsTEDhOxKf/0F/M1d0gJmHEU0puQzYPp9zJsIWC2yJjbgy3Y3Q==}
@@ -1990,6 +1997,11 @@ snapshots:
     optionalDependencies:
       react: 18.3.1
       react-dom: 18.3.1(react@18.3.1)
+
+  '@clerk/themes@2.2.50':
+    dependencies:
+      '@clerk/types': 4.60.1
+      tslib: 2.8.1
 
   '@clerk/types@4.60.1':
     dependencies:

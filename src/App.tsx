@@ -5,6 +5,8 @@ import SignUp from './page/SignUp';
 import Hero from './page/Hero';
 import FileContextProvider from './context/FileContext';
 import { SignedIn, SignedOut } from '@clerk/clerk-react';
+import { AppLayout } from './components/app-layout';
+import History from './page/History';
 
 function App() {
   return (
@@ -17,9 +19,26 @@ function App() {
         element={
           <>
             <SignedIn>
-              <FileContextProvider>
-                <Home />
-              </FileContextProvider>
+              <AppLayout>
+                <FileContextProvider>
+                  <Home />
+                </FileContextProvider>
+              </AppLayout>
+            </SignedIn>
+            <SignedOut>
+              <SignIn />
+            </SignedOut>
+          </>
+        }
+      />
+      <Route
+        path="/history"
+        element={
+          <>
+            <SignedIn>
+              <AppLayout>
+                <History />
+              </AppLayout>
             </SignedIn>
             <SignedOut>
               <SignIn />
