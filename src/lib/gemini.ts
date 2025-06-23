@@ -1,15 +1,13 @@
 import { GoogleGenAI } from "@google/genai";
 
-
 export const generateTemplate = async (
   content: string,
   templateType: string,
-  placeholders: string[],
-  signal: AbortSignal
+  placeholders: string[]
 ) => {
   const apiKey = import.meta.env.VITE_GEMINI_KEY;
   
-const ai = new GoogleGenAI({ apiKey});
+  const ai = new GoogleGenAI({ apiKey });
   if (!apiKey) {
     throw new Error("VITE_GEMINI_KEY is not set in the environment variables.");
   }
@@ -25,12 +23,11 @@ All placeholders (words starting with '@') must be preserved exactly as provided
 
   try {
     const response = await ai.models.generateContent({
-        model: "gemini-2.5-flash",
-        contents: prompt,
-      });
-      console.log(response.text);
+      model: "gemini-2.5-flash",
+      contents: prompt,
+    });
+    console.log(response.text);
 
-    
     if (response.text) {
       let text = response.text;
       
