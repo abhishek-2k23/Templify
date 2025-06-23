@@ -2,12 +2,14 @@ import { useState, useRef } from 'react';
 import { Button } from '../components/ui/button';
 import { Card, CardContent } from '../components/ui/card';
 import { Textarea } from '../components/ui/textarea';
-import { Upload, FileText, Download, X } from 'lucide-react';
+import { Upload, FileText, Download, X, Sparkles } from 'lucide-react';
 import useFileUploader from '../hooks/useFileUploader';
 import { useFileContext } from '../hooks/useFileContext';
 import { useHistory } from '../context/useHistory';
 import useFileHandling from '../hooks/useFileHandling';
 import React from 'react';
+import { generateTemplate } from '../lib/gemini';
+import toast from 'react-hot-toast';
 
 export default function HomePage() {
   const { headers, file, processedData } = useFileContext();
@@ -17,7 +19,6 @@ export default function HomePage() {
     handleDragOver,
     handleDrop,
     handleFileChange,
-    error,
     inputRef,
     dragging,
     handleResetButton,
@@ -28,10 +29,12 @@ export default function HomePage() {
   });
   const [template, setTemplate] = useState('');
   const [pdfHeader, setPdfHeader] = useState('');
+  const [templateType, setTemplateType] = useState('Invitation');
   const [showSuggestions, setShowSuggestions] = useState(false);
   const [filteredHeaders, setFilteredHeaders] = useState<string[]>([]);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const { addToHistory } = useHistory();
+  const [isGenerating, setIsGenerating] = useState(false);
 
   // Set default PDF header when file is uploaded
   React.useEffect(() => {
@@ -40,6 +43,33 @@ export default function HomePage() {
       setPdfHeader(`${fileName} data`);
     }
   }, [file]);
+
+  const handleGenerateTemplate = async () => {
+    if (!template.trim()) {
+      toast.error("Please enter some content in the textarea before generating.");
+      return;
+    }
+
+    setIsGenerating(true);
+    try {
+      const generated = await generateTemplate(template, templateType, headers);
+      if (generated) {
+        setTemplate(generated);
+        toast.success("Template generated successfully!");
+      } else {
+        toast.error("The AI returned an empty response. Please try again.");
+      }
+    } catch (error) {
+      console.error("Failed to generate template:", error);
+      if (error instanceof Error) {
+        toast.error(error.message);
+      } else {
+        toast.error("Failed to generate template. Check the console for more details.");
+      }
+    } finally {
+      setIsGenerating(false);
+    }
+  };
 
   const handleTemplateChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
     const value = e.target.value;
@@ -156,7 +186,6 @@ export default function HomePage() {
                 >
                   Choose File
                 </Button>
-                {error && <p className="text-red-500 mt-4">{error}</p>}
               </div>
             </div>
           ) : (
@@ -213,20 +242,37 @@ export default function HomePage() {
                 </h3>
                 
                 {/* PDF Header Input */}
-                <div className="mb-4">
-                  <label className="block text-white text-sm font-medium mb-2">
-                    PDF Header (optional):
-                  </label>
-                  <input
-                    type="text"
-                    value={pdfHeader}
-                    onChange={(e) => setPdfHeader(e.target.value)}
-                    placeholder="Enter PDF header..."
-                    className="w-full px-3 py-2 bg-white/10 border border-white/20 rounded-lg text-white placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-purple-500"
-                  />
-                  <p className="text-gray-400 text-xs mt-1">
-                    This will appear at the top of your PDF. Default: "{file ? file.name.replace(/\.[^/.]+$/, "") + " data" : "processed_data"}"
-                  </p>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+                  <div>
+                    <label className="block text-white text-sm font-medium mb-2">
+                      PDF Header (optional):
+                    </label>
+                    <input
+                      type="text"
+                      value={pdfHeader}
+                      onChange={(e) => setPdfHeader(e.target.value)}
+                      placeholder="Enter PDF header..."
+                      className="w-full px-3 py-2 bg-white/10 border border-white/20 rounded-lg text-white placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-purple-500"
+                    />
+                    <p className="text-gray-400 text-xs mt-1">
+                      This will appear at the top of your PDF.
+                    </p>
+                  </div>
+                  <div>
+                    <label className="block text-white text-sm font-medium mb-2">
+                      Template Type:
+                    </label>
+                    <input
+                      type="text"
+                      value={templateType}
+                      onChange={(e) => setTemplateType(e.target.value)}
+                      placeholder="e.g., Invitation, Report"
+                      className="w-full px-3 py-2 bg-white/10 border border-white/20 rounded-lg text-white placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-purple-500"
+                    />
+                    <p className="text-gray-400 text-xs mt-1">
+                      Helps the AI generate a better template.
+                    </p>
+                  </div>
                 </div>
               </div>
               
@@ -236,9 +282,18 @@ export default function HomePage() {
                   value={template}
                   onChange={handleTemplateChange}
                   placeholder="Start typing your template... Use @ to insert headers from your spreadsheet, or click on the header blocks above"
-                  className="min-h-[200px] bg-white/10 border-white/20 text-white placeholder:text-gray-400 resize-none"
+                  className="min-h-[200px] bg-white/10 border-white/20 text-white placeholder:text-gray-400 resize-none pr-10"
                   rows={8}
                 />
+                <Button
+                  size="icon"
+                  variant="ghost"
+                  onClick={handleGenerateTemplate}
+                  disabled={isGenerating}
+                  className="absolute top-3 right-3 text-white/70 hover:text-white hover:bg-white/10"
+                >
+                  <Sparkles className={`w-5 h-5 ${isGenerating ? 'animate-spin' : ''}`} />
+                </Button>
 
                 {showSuggestions && (
                   <div className="absolute top-full left-0 right-0 mt-2 bg-gray-900 backdrop-blur-md border border-white/20 rounded-lg shadow-xl z-10">
@@ -250,9 +305,9 @@ export default function HomePage() {
                         <button
                           key={header}
                           onClick={() => insertHeader(header)}
-                          className="w-full text-left px-3 py-2 text-white hover:bg-white/10 rounded transition-colors"
+                          className="w-full text-left px-3 py-2 text-white hover:bg-white/10 rounded-md"
                         >
-                          @{header}
+                          {header}
                         </button>
                       ))}
                     </div>
@@ -260,22 +315,20 @@ export default function HomePage() {
                 )}
               </div>
 
-              <div className="flex space-x-4">
+              <div className="flex justify-end gap-4">
                 <Button
                   onClick={() => handleDownload('txt')}
-                  className="bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-700 hover:to-emerald-700 flex-1"
-                  disabled={!template.trim()}
+                  className="bg-gradient-to-r from-green-500 to-emerald-500 hover:from-green-600 hover:to-emerald-600"
                 >
                   <Download className="w-4 h-4 mr-2" />
-                  Download as TXT
+                  Download .txt
                 </Button>
                 <Button
                   onClick={() => handleDownload('pdf')}
-                  className="bg-gradient-to-r from-red-600 to-pink-600 hover:from-red-700 hover:to-pink-700 flex-1"
-                  disabled={!template.trim()}
+                  className="bg-gradient-to-r from-blue-500 to-sky-500 hover:from-blue-600 hover:to-sky-600"
                 >
                   <Download className="w-4 h-4 mr-2" />
-                  Download as PDF
+                  Download .pdf
                 </Button>
               </div>
             </div>

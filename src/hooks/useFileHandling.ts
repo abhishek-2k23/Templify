@@ -3,6 +3,7 @@ import { saveAs } from 'file-saver';
 import pdfMake from 'pdfmake/build/pdfmake';
 import pdfFonts from 'pdfmake/build/vfs_fonts';
 import { useFileContext } from './useFileContext';
+import toast from 'react-hot-toast';
 
 pdfMake.vfs = pdfFonts.vfs;
 const useFileHandling = () => {
@@ -25,7 +26,7 @@ const useFileHandling = () => {
         file.name.toLowerCase().endsWith(ext)
       )
     ) {
-      alert('Please upload only Excel (.xls, .xlsx) or CSV files');
+      toast.error('Please upload only Excel (.xls, .xlsx) or CSV files');
       return;
     }
     setFile(file);
@@ -46,6 +47,7 @@ const useFileHandling = () => {
           setHeaders(extractedHeaders);
           setTableData(jsonData);
           setTemplate('');
+          toast.success("File processed successfully!");
         }
       }
     };
@@ -99,6 +101,15 @@ const useFileHandling = () => {
   };
 
   const processAndDownload = (template: string, format: 'txt' | 'pdf', pdfHeader?: string, fileName?: string) => {
+    if (!template.trim()) {
+      toast.error("Template is empty. Please write a template before downloading.");
+      return;
+    }
+    if (tableData.length === 0) {
+      toast.error("No data available to process. Please upload a file.");
+      return;
+    }
+
     const processed = tableData.map((row) => {
       let processedRow = template;
       headers.forEach((header) => {
@@ -113,6 +124,7 @@ const useFileHandling = () => {
         type: 'text/plain;charset=utf-8',
       });
       saveAs(blob, `${fileName || 'processed_data'}.txt`);
+      toast.success(`Successfully downloaded ${fileName || 'processed_data'}.txt`);
     } else {
       const content = [
         { text: pdfHeader || `${fileName || 'processed_data'} data`, style: 'header' },
@@ -136,6 +148,7 @@ const useFileHandling = () => {
       };
 
       pdfMake.createPdf(docDefinition).download(`${fileName || 'processed_data'}.pdf`);
+      toast.success(`Successfully downloaded ${fileName || 'processed_data'}.pdf`);
     }
 
     // Also update the context

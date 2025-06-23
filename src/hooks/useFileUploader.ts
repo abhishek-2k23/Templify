@@ -1,12 +1,12 @@
 import { ChangeEvent, DragEvent, useRef, useState } from "react"
 import useFileHandling from "./useFileHandling"
+import toast from "react-hot-toast";
 interface FileUploaderProps {
     onFileSelected: (file: File) => void
   }
 const useFileUploader =  ({onFileSelected}: FileUploaderProps) => {
     const {handleResetData} = useFileHandling();
     const inputRef = useRef<HTMLInputElement>(null)
-    const [error, setError] = useState("")
     const [file, setFile] = useState<File | null>(null)
   
     const [dragging, setDragging] = useState(false)
@@ -36,7 +36,7 @@ const useFileUploader =  ({onFileSelected}: FileUploaderProps) => {
       const file = event.target.files?.[0]
       if (file) {
          if (file.size > 2 * 1024 * 1024) {
-           alert('File size exceeds 2MB. Please upload a smaller file.');
+           toast.error('File size exceeds 2MB. Please upload a smaller file.');
            if (inputRef.current) {
              inputRef.current.value = '';
            }
@@ -50,13 +50,11 @@ const useFileUploader =  ({onFileSelected}: FileUploaderProps) => {
           if (inputRef.current) {
             inputRef.current.value = ""
           }
-          alert("Please upload only Excel (.xls, .xlsx) or CSV files")
-          setError("Please upload only Excel (.xls, .xlsx) or CSV files")
+          toast.error("Please upload only Excel (.xls, .xlsx) or CSV files")
           return
         }
   
         setFile(file)
-        setError("")
         onFileSelected(file)
       }
     }
@@ -65,14 +63,14 @@ const useFileUploader =  ({onFileSelected}: FileUploaderProps) => {
       if(file){
         setFile(null);
         handleResetData();
+        toast.success("Data has been reset successfully!");
       }
       if(inputRef.current){
         inputRef.current.value = ""
       }
-      setError("");
     }
 
-    return {handleDragLeave, handleDragOver, handleDrop, handleFileChange, error,file, inputRef, dragging, handleResetButton}
+    return {handleDragLeave, handleDragOver, handleDrop, handleFileChange, file, inputRef, dragging, handleResetButton}
 }
 
 export default useFileUploader;
