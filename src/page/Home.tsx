@@ -35,6 +35,7 @@ export default function HomePage() {
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const { addToHistory } = useHistory();
   const [isGenerating, setIsGenerating] = useState(false);
+  const generationController = useRef<AbortController | null>(null);
 
   // Set default PDF header when file is uploaded
   React.useEffect(() => {
@@ -50,9 +51,15 @@ export default function HomePage() {
       return;
     }
 
+    const controller = new AbortController();
+    generationController.current = controller;
     setIsGenerating(true);
+    const toastId = toast.loading("Generating template...");
+
     try {
-      const generated = await generateTemplate(template, templateType, headers);
+      const generated = await generateTemplate(template, templateType, headers, controller.signal);
+      toast.dismiss(toastId);
+      
       if (generated) {
         setTemplate(generated);
         toast.success("Template generated successfully!");
@@ -60,14 +67,20 @@ export default function HomePage() {
         toast.error("The AI returned an empty response. Please try again.");
       }
     } catch (error) {
-      console.error("Failed to generate template:", error);
-      if (error instanceof Error) {
+      toast.dismiss(toastId);
+      if (error instanceof Error && error.name !== 'AbortError') {
         toast.error(error.message);
-      } else {
-        toast.error("Failed to generate template. Check the console for more details.");
       }
     } finally {
       setIsGenerating(false);
+      generationController.current = null;
+    }
+  };
+
+  const handleCancelGeneration = () => {
+    if (generationController.current) {
+      generationController.current.abort();
+      toast.error("Generation cancelled.");
     }
   };
 
@@ -284,16 +297,28 @@ export default function HomePage() {
                   placeholder="Start typing your template... Use @ to insert headers from your spreadsheet, or click on the header blocks above"
                   className="min-h-[200px] bg-white/10 border-white/20 text-white placeholder:text-gray-400 resize-none pr-10"
                   rows={8}
-                />
-                <Button
-                  size="icon"
-                  variant="ghost"
-                  onClick={handleGenerateTemplate}
                   disabled={isGenerating}
-                  className="absolute top-3 right-3 text-white/70 hover:text-white hover:bg-white/10"
-                >
-                  <Sparkles className={`w-5 h-5 ${isGenerating ? 'animate-spin' : ''}`} />
-                </Button>
+                />
+                {!isGenerating ? (
+                  <Button
+                    size="icon"
+                    variant="ghost"
+                    onClick={handleGenerateTemplate}
+                    disabled={isGenerating}
+                    className="absolute top-3 right-3 text-white/70 hover:text-white hover:bg-white/10"
+                  >
+                    <Sparkles className="w-5 h-5" />
+                  </Button>
+                ) : (
+                  <Button
+                    size="icon"
+                    variant="destructive"
+                    onClick={handleCancelGeneration}
+                    className="absolute top-3 right-3"
+                  >
+                    <X className="w-5 h-5" />
+                  </Button>
+                )}
 
                 {showSuggestions && (
                   <div className="absolute top-full left-0 right-0 mt-2 bg-gray-900 backdrop-blur-md border border-white/20 rounded-lg shadow-xl z-10">
@@ -319,6 +344,7 @@ export default function HomePage() {
                 <Button
                   onClick={() => handleDownload('txt')}
                   className="bg-gradient-to-r from-green-500 to-emerald-500 hover:from-green-600 hover:to-emerald-600"
+                  disabled={isGenerating}
                 >
                   <Download className="w-4 h-4 mr-2" />
                   Download .txt
@@ -326,6 +352,7 @@ export default function HomePage() {
                 <Button
                   onClick={() => handleDownload('pdf')}
                   className="bg-gradient-to-r from-blue-500 to-sky-500 hover:from-blue-600 hover:to-sky-600"
+                  disabled={isGenerating}
                 >
                   <Download className="w-4 h-4 mr-2" />
                   Download .pdf

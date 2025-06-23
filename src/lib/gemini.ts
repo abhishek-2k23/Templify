@@ -4,7 +4,8 @@ import { GoogleGenAI } from "@google/genai";
 export const generateTemplate = async (
   content: string,
   templateType: string,
-  placeholders: string[]
+  placeholders: string[],
+  signal: AbortSignal
 ) => {
   const apiKey = import.meta.env.VITE_GEMINI_KEY;
   
@@ -17,7 +18,7 @@ const ai = new GoogleGenAI({ apiKey});
   }
 
   const prompt = `Generate a polite, sensible, and generic text template tailored for a "${templateType}" context.
-Naturally integrate the following placeholders within the content of the template: ${placeholders}.
+Naturally integrate the following placeholders within the content of the template: ${placeholders.join(', ')}.
 The output should ONLY be the ready-to-use template text itself, including appropriate introductory and concluding remarks relevant to the context.
 Do not include any extra explanations, headers, or markdown formatting like '**' or '##'.
 All placeholders (words starting with '@') must be preserved exactly as provided.`;
@@ -44,6 +45,11 @@ All placeholders (words starting with '@') must be preserved exactly as provided
     
     return null;
   } catch (error) {
+    if (error instanceof Error && error.name === 'AbortError') {
+      console.log('Gemini API call was aborted.');
+      // Re-throw the abort error so the calling function can catch it
+      throw error;
+    }
     console.error('Error generating template with Gemini:', error);
     if (error instanceof Error) {
         throw new Error(`Gemini API Error: ${error.message}`);
