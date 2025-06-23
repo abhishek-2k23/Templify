@@ -15,7 +15,6 @@ const FileUploader: React.FC<FileUploaderProps> = ({ onFileSelected }) => {
     handleDragOver,
     handleDrop,
     handleFileChange,
-    error,
     file,
     inputRef,
     dragging,
@@ -64,7 +63,6 @@ const FileUploader: React.FC<FileUploaderProps> = ({ onFileSelected }) => {
         )}
       </div>
 
-      {error && <p className="mt-2 text-red-500 text-sm">{error}</p>}
       {
         file && <ResetButton handleResetButton={handleResetButton}/>
       }

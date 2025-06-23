@@ -57,7 +57,7 @@ export default function HomePage() {
     const toastId = toast.loading("Generating template...");
 
     try {
-      const generated = await generateTemplate(template, templateType, headers, controller.signal);
+      const generated = await generateTemplate(template, templateType, headers);
       toast.dismiss(toastId);
       
       if (generated) {
