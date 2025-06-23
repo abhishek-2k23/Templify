@@ -15,8 +15,11 @@ export const generateTemplate = async (
     throw new Error("Maximum word limit is 300.");
   }
 
-  const prompt = `Generate a polite, sensible, and generic text template tailored for a "${templateType}" context.
-Naturally integrate the following placeholders within the content of the template: ${placeholders.join(', ')}.
+  const prompt = `Generate a polite, sensible, and generic text template tailored for a "${templateType}" context using the following content as inspiration:
+"""
+${content}
+"""
+You have only these placeholders available: [${placeholders.map(h => `@${h}`).join(', ')}]. You can use them only as shown, with the @ prefix and the exact header name. Do not invent or use any other placeholders.
 The output should ONLY be the ready-to-use template text itself, including appropriate introductory and concluding remarks relevant to the context.
 Do not include any extra explanations, headers, or markdown formatting like '**' or '##'.
 All placeholders (words starting with '@') must be preserved exactly as provided.`;

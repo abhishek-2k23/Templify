@@ -35,7 +35,6 @@ export default function HomePage() {
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const { addToHistory } = useHistory();
   const [isGenerating, setIsGenerating] = useState(false);
-  const generationController = useRef<AbortController | null>(null);
 
   // Set default PDF header when file is uploaded
   React.useEffect(() => {
@@ -51,8 +50,6 @@ export default function HomePage() {
       return;
     }
 
-    const controller = new AbortController();
-    generationController.current = controller;
     setIsGenerating(true);
     const toastId = toast.loading("Generating template...");
 
@@ -68,19 +65,11 @@ export default function HomePage() {
       }
     } catch (error) {
       toast.dismiss(toastId);
-      if (error instanceof Error && error.name !== 'AbortError') {
+      if (error instanceof Error) {
         toast.error(error.message);
       }
     } finally {
       setIsGenerating(false);
-      generationController.current = null;
-    }
-  };
-
-  const handleCancelGeneration = () => {
-    if (generationController.current) {
-      generationController.current.abort();
-      toast.error("Generation cancelled.");
     }
   };
 
@@ -299,26 +288,15 @@ export default function HomePage() {
                   rows={8}
                   disabled={isGenerating}
                 />
-                {!isGenerating ? (
-                  <Button
-                    size="icon"
-                    variant="ghost"
-                    onClick={handleGenerateTemplate}
-                    disabled={isGenerating}
-                    className="absolute top-3 right-3 text-white/70 hover:text-white hover:bg-white/10"
-                  >
-                    <Sparkles className="w-5 h-5" />
-                  </Button>
-                ) : (
-                  <Button
-                    size="icon"
-                    variant="destructive"
-                    onClick={handleCancelGeneration}
-                    className="absolute top-3 right-3"
-                  >
-                    <X className="w-5 h-5" />
-                  </Button>
-                )}
+                <Button
+                  size="icon"
+                  variant="ghost"
+                  onClick={handleGenerateTemplate}
+                  disabled={isGenerating}
+                  className="absolute top-3 right-3 text-white/70 hover:text-white hover:bg-white/10"
+                >
+                  <Sparkles className="w-5 h-5" />
+                </Button>
 
                 {showSuggestions && (
                   <div className="absolute top-full left-0 right-0 mt-2 bg-gray-900 backdrop-blur-md border border-white/20 rounded-lg shadow-xl z-10">
