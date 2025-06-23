@@ -3,16 +3,23 @@
 import { useState, useEffect } from "react"
 import { Button } from "../components/ui/button"
 import { ArrowRight, FileSpreadsheet, Zap, Download, Clock } from "lucide-react"
-import { Link } from "react-router-dom"
+import { Link, useNavigate } from "react-router-dom"
 import { useAuth } from "@clerk/clerk-react"
 
 export default function LandingPage() {
   const [mounted, setMounted] = useState(false)
   const { isSignedIn } = useAuth()
+  const navigate = useNavigate();
 
   useEffect(() => {
     setMounted(true)
   }, [])
+
+  useEffect(() => {
+    if (isSignedIn) {
+      navigate('/home');
+    }
+  }, [isSignedIn, navigate]);
 
   if (!mounted) return null
 

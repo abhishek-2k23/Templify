@@ -1,9 +1,10 @@
 interface ProcessedDataProps {
     data: string[];
-    downloadProcessedData: (format: 'txt' | 'pdf') => void;
+    downloadProcessedData: (format: 'txt' | 'pdf', pdfHeader?: string) => void;
+    pdfHeader?: string;
 }
 
-const ProcessedData: React.FC<ProcessedDataProps> = ({ data, downloadProcessedData }) => {
+const ProcessedData: React.FC<ProcessedDataProps> = ({ data, downloadProcessedData, pdfHeader }) => {
     return (
         <div>
             <h3 className="text-lg text-white font-semibold mb-2">Preview</h3>
@@ -21,7 +22,7 @@ const ProcessedData: React.FC<ProcessedDataProps> = ({ data, downloadProcessedDa
                 <button className='px-2 md:px-5 py-3 border border-gray-400 rounded-lg' onClick={() => downloadProcessedData('txt')}>
                     <p >Download as TXT</p>
                 </button>
-                <button className='px-2 md:px-5 py-3 border border-gray-400 rounded-lg' onClick={() => downloadProcessedData('pdf')}>
+                <button className='px-2 md:px-5 py-3 border border-gray-400 rounded-lg' onClick={() => downloadProcessedData('pdf', pdfHeader)}>
                     Download as PDF
                 </button>
             </div>

@@ -66,20 +66,25 @@ const useFileHandling = () => {
     setProcessedData(processed);
   };
 
-  const downloadProcessedData = (format: 'txt' | 'pdf') => {
+  const downloadProcessedData = (format: 'txt' | 'pdf', pdfHeader?: string) => {
     if (format === 'txt') {
       const blob = new Blob([processedData.join('\n')], {
         type: 'text/plain;charset=utf-8',
       });
       saveAs(blob, 'processed_data.txt');
     } else {
+      const content = [
+        { text: pdfHeader || 'Processed Data', style: 'header' },
+        { text: '\n' }
+      ];
+      
+      processedData.forEach((data) => {
+        content.push({ text: data });
+        content.push({ text: '\n\n\n\n' }); // 4 spaces spacing
+      });
+
       const docDefinition = {
-        content: [
-          { text: 'Processed Data', style: 'header' },
-          { text: '\n' },
-          ...processedData.map((data) => ({ text: data })),
-          { text: '\n' },
-        ],
+        content: content,
         styles: {
           header: {
             fontSize: 18,
@@ -93,7 +98,7 @@ const useFileHandling = () => {
     }
   };
 
-  const processAndDownload = (template: string, format: 'txt' | 'pdf') => {
+  const processAndDownload = (template: string, format: 'txt' | 'pdf', pdfHeader?: string, fileName?: string) => {
     const processed = tableData.map((row) => {
       let processedRow = template;
       headers.forEach((header) => {
@@ -107,12 +112,30 @@ const useFileHandling = () => {
       const blob = new Blob([processed.join('\n\n')], {
         type: 'text/plain;charset=utf-8',
       });
-      saveAs(blob, 'processed_data.txt');
+      saveAs(blob, `${fileName || 'processed_data'}.txt`);
     } else {
+      const content = [
+        { text: pdfHeader || `${fileName || 'processed_data'} data`, style: 'header' },
+        { text: '\n' }
+      ];
+      
+      processed.forEach((p) => {
+        content.push({ text: p });
+        content.push({ text: '\n\n\n\n' }); // 4 spaces spacing
+      });
+
       const docDefinition = {
-        content: processed.map((p) => ({ text: p })),
+        content: content,
+        styles: {
+          header: {
+            fontSize: 18,
+            bold: true,
+            marginBottom: 10,
+          },
+        },
       };
-      pdfMake.createPdf(docDefinition).download('processed_data.pdf');
+
+      pdfMake.createPdf(docDefinition).download(`${fileName || 'processed_data'}.pdf`);
     }
 
     // Also update the context

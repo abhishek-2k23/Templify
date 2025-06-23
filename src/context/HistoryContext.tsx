@@ -4,7 +4,10 @@ type HistoryEntry = {
   id: string;
   fileName: string;
   template: string;
+  processedData: string[];
   timestamp: Date;
+  fileType: 'txt' | 'pdf';
+  pdfHeader?: string;
 };
 
 type HistoryContextType = {

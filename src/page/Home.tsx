@@ -7,9 +7,10 @@ import useFileUploader from '../hooks/useFileUploader';
 import { useFileContext } from '../hooks/useFileContext';
 import { useHistory } from '../context/useHistory';
 import useFileHandling from '../hooks/useFileHandling';
+import React from 'react';
 
 export default function HomePage() {
-  const { headers, file } = useFileContext();
+  const { headers, file, processedData } = useFileContext();
   const { handleFileSelected, processAndDownload } = useFileHandling();
   const {
     handleDragLeave,
@@ -26,10 +27,19 @@ export default function HomePage() {
     },
   });
   const [template, setTemplate] = useState('');
+  const [pdfHeader, setPdfHeader] = useState('');
   const [showSuggestions, setShowSuggestions] = useState(false);
   const [filteredHeaders, setFilteredHeaders] = useState<string[]>([]);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const { addToHistory } = useHistory();
+
+  // Set default PDF header when file is uploaded
+  React.useEffect(() => {
+    if (file) {
+      const fileName = file.name.replace(/\.[^/.]+$/, ""); // Remove extension
+      setPdfHeader(`${fileName} data`);
+    }
+  }, [file]);
 
   const handleTemplateChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
     const value = e.target.value;
@@ -78,12 +88,28 @@ export default function HomePage() {
     }, 0);
   };
 
+  const insertHeaderAtEnd = (header: string) => {
+    const newTemplate = template + (template.endsWith(' ') ? '' : ' ') + `@${header} `;
+    setTemplate(newTemplate);
+    
+    // Focus the textarea and move cursor to end
+    setTimeout(() => {
+      textareaRef.current?.focus();
+      const newCursorPosition = newTemplate.length;
+      textareaRef.current?.setSelectionRange(newCursorPosition, newCursorPosition);
+    }, 0);
+  };
+
   const handleDownload = (format: 'txt' | 'pdf') => {
-    processAndDownload(template, format);
+    const fileName = file ? file.name.replace(/\.[^/.]+$/, "") : 'processed_data';
+    processAndDownload(template, format, pdfHeader, fileName);
     if (file) {
       addToHistory({
         fileName: file.name,
         template: template,
+        processedData: processedData,
+        fileType: format,
+        pdfHeader: pdfHeader,
       });
     }
   };
@@ -161,13 +187,14 @@ export default function HomePage() {
                 </h4>
                 <div className="flex flex-wrap gap-2">
                   {headers.map((header: string, index: number) => (
-                    <div
+                    <button
                       key={header}
-                      className="bg-gradient-to-r from-purple-500/20 to-blue-500/20 backdrop-blur-sm border border-white/20 rounded-full px-4 py-2 text-white text-sm animate-float"
+                      onClick={() => insertHeaderAtEnd(header)}
+                      className="bg-gradient-to-r from-purple-500/20 to-blue-500/20 backdrop-blur-sm border border-white/20 rounded-full px-4 py-2 text-white text-sm animate-float hover:from-purple-500/30 hover:to-blue-500/30 transition-all duration-200 cursor-pointer"
                       style={{ animationDelay: `${index * 0.1}s` }}
                     >
                       @{header}
-                    </div>
+                    </button>
                   ))}
                 </div>
               </div>
@@ -179,56 +206,78 @@ export default function HomePage() {
       {file && (
         <Card className="bg-black/20 border-white/20 animate-slide-up delay-300">
           <CardContent className="p-8 space-y-6">
-            <h3 className="text-xl font-semibold text-white">
-              Design Your Template
-            </h3>
-            <div className="relative">
-              <Textarea
-                ref={textareaRef}
-                value={template}
-                onChange={handleTemplateChange}
-                placeholder="Start typing your template... Use @ to insert headers from your spreadsheet"
-                className="min-h-[200px] bg-white/10 border-white/20 text-white placeholder:text-gray-400 resize-none"
-                rows={8}
-              />
-
-              {showSuggestions && (
-                <div className="absolute top-full left-0 right-0 mt-2 bg-gray-900 backdrop-blur-md border border-white/20 rounded-lg shadow-xl z-10">
-                  <div className="p-2">
-                    <p className="text-gray-300 text-sm mb-2 px-3">
-                      Insert header:
-                    </p>
-                    {filteredHeaders.map((header: string) => (
-                      <button
-                        key={header}
-                        onClick={() => insertHeader(header)}
-                        className="w-full text-left px-3 py-2 text-white hover:bg-white/10 rounded transition-colors"
-                      >
-                        @{header}
-                      </button>
-                    ))}
-                  </div>
+            <div className="space-y-6">
+              <div>
+                <h3 className="text-xl font-semibold text-white mb-4">
+                  Design Your Template
+                </h3>
+                
+                {/* PDF Header Input */}
+                <div className="mb-4">
+                  <label className="block text-white text-sm font-medium mb-2">
+                    PDF Header (optional):
+                  </label>
+                  <input
+                    type="text"
+                    value={pdfHeader}
+                    onChange={(e) => setPdfHeader(e.target.value)}
+                    placeholder="Enter PDF header..."
+                    className="w-full px-3 py-2 bg-white/10 border border-white/20 rounded-lg text-white placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-purple-500"
+                  />
+                  <p className="text-gray-400 text-xs mt-1">
+                    This will appear at the top of your PDF. Default: "{file ? file.name.replace(/\.[^/.]+$/, "") + " data" : "processed_data"}"
+                  </p>
                 </div>
-              )}
-            </div>
+              </div>
+              
+              <div className="relative">
+                <Textarea
+                  ref={textareaRef}
+                  value={template}
+                  onChange={handleTemplateChange}
+                  placeholder="Start typing your template... Use @ to insert headers from your spreadsheet, or click on the header blocks above"
+                  className="min-h-[200px] bg-white/10 border-white/20 text-white placeholder:text-gray-400 resize-none"
+                  rows={8}
+                />
 
-            <div className="flex space-x-4">
-              <Button
-                onClick={() => handleDownload('txt')}
-                className="bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-700 hover:to-emerald-700 flex-1"
-                disabled={!template.trim()}
-              >
-                <Download className="w-4 h-4 mr-2" />
-                Download as TXT
-              </Button>
-              <Button
-                onClick={() => handleDownload('pdf')}
-                className="bg-gradient-to-r from-red-600 to-pink-600 hover:from-red-700 hover:to-pink-700 flex-1"
-                disabled={!template.trim()}
-              >
-                <Download className="w-4 h-4 mr-2" />
-                Download as PDF
-              </Button>
+                {showSuggestions && (
+                  <div className="absolute top-full left-0 right-0 mt-2 bg-gray-900 backdrop-blur-md border border-white/20 rounded-lg shadow-xl z-10">
+                    <div className="p-2">
+                      <p className="text-gray-300 text-sm mb-2 px-3">
+                        Insert header:
+                      </p>
+                      {filteredHeaders.map((header: string) => (
+                        <button
+                          key={header}
+                          onClick={() => insertHeader(header)}
+                          className="w-full text-left px-3 py-2 text-white hover:bg-white/10 rounded transition-colors"
+                        >
+                          @{header}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+                )}
+              </div>
+
+              <div className="flex space-x-4">
+                <Button
+                  onClick={() => handleDownload('txt')}
+                  className="bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-700 hover:to-emerald-700 flex-1"
+                  disabled={!template.trim()}
+                >
+                  <Download className="w-4 h-4 mr-2" />
+                  Download as TXT
+                </Button>
+                <Button
+                  onClick={() => handleDownload('pdf')}
+                  className="bg-gradient-to-r from-red-600 to-pink-600 hover:from-red-700 hover:to-pink-700 flex-1"
+                  disabled={!template.trim()}
+                >
+                  <Download className="w-4 h-4 mr-2" />
+                  Download as PDF
+                </Button>
+              </div>
             </div>
           </CardContent>
         </Card>

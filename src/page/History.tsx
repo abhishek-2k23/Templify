@@ -4,13 +4,56 @@ import { Button } from "../components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "../components/ui/card"
 import { Download, FileText, Calendar, Trash2 } from "lucide-react"
 import { useHistory } from "../context/useHistory"
+import { saveAs } from 'file-saver';
+import pdfMake from 'pdfmake/build/pdfmake';
+import pdfFonts from 'pdfmake/build/vfs_fonts';
+import { useNavigate } from 'react-router-dom';
+
+pdfMake.vfs = pdfFonts.vfs;
+
+type HistoryEntry = {
+  id: string;
+  fileName: string;
+  template: string;
+  processedData: string[];
+  timestamp: Date;
+  fileType: 'txt' | 'pdf';
+  pdfHeader?: string;
+};
 
 export default function HistoryPage() {
   const { history } = useHistory()
+  const navigate = useNavigate();
 
-  const handleDownload = (templateName: string, fileType: string) => {
-    // Simulate download
-    console.log(`Downloading ${templateName} as ${fileType}`)
+  const handleDownload = (template: HistoryEntry) => {
+    const fileName = template.fileName.replace(/\.[^/.]+$/, "");
+    
+    if (template.fileType === 'txt') {
+      const blob = new Blob([template.processedData.join('\n\n')], {
+        type: 'text/plain;charset=utf-8',
+      });
+      saveAs(blob, `${fileName}.txt`);
+    } else {
+      const content = [
+        { text: template.pdfHeader || `${fileName} data`, style: 'header' },
+        { text: '\n' }
+      ];
+      template.processedData.forEach((data) => {
+        content.push({ text: data });
+        content.push({ text: '\n\n\n\n' });
+      });
+      const docDefinition = {
+        content: content,
+        styles: {
+          header: {
+            fontSize: 18,
+            bold: true,
+            marginBottom: 10,
+          },
+        },
+      };
+      pdfMake.createPdf(docDefinition).download(`${fileName}.pdf`);
+    }
   }
 
   const handleDelete = (templateId: string) => {
@@ -38,7 +81,7 @@ export default function HistoryPage() {
                 <div className="flex items-center space-x-3">
                   <div
                     className={`p-2 rounded-lg ${
-                      template.fileName.endsWith('.pdf')
+                      template.fileType === 'pdf'
                         ? 'bg-red-500/20 text-red-400'
                         : 'bg-blue-500/20 text-blue-400'
                     }`}
@@ -70,19 +113,22 @@ export default function HistoryPage() {
                 <p className="text-gray-300 text-sm line-clamp-2">
                   {template.template}
                 </p>
+                {template.pdfHeader && (
+                  <p className="text-gray-400 text-xs mt-2">
+                    PDF Header: {template.pdfHeader}
+                  </p>
+                )}
               </div>
               <div className="flex space-x-2">
                 <Button
-                  onClick={() =>
-                    handleDownload(template.fileName, template.template)
-                  }
+                  onClick={() => handleDownload(template)}
                   className="bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700 flex-1 transition-all duration-300"
                 >
                   <Download className="w-4 h-4 mr-2" />
                   Re-download
                 </Button>
                 <div className="bg-white/10 rounded px-3 py-2 text-white text-sm font-medium">
-                  {template.fileName.endsWith('.pdf') ? 'PDF' : 'TXT'}
+                  {template.fileType.toUpperCase()}
                 </div>
               </div>
             </CardContent>
@@ -96,7 +142,7 @@ export default function HistoryPage() {
           <FileText className="w-16 h-16 text-white/40 mx-auto mb-4" />
           <h3 className="text-xl font-semibold text-white mb-2">No templates yet</h3>
           <p className="text-gray-400 mb-6">Create your first template to see it here</p>
-          <Button className="bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700">
+          <Button className="bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700" onClick={() => navigate('/home')}>
             Create Template
           </Button>
         </div>
