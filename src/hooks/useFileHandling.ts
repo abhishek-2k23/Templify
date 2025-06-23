@@ -6,6 +6,8 @@ import { useFileContext } from './useFileContext';
 import toast from 'react-hot-toast';
 
 pdfMake.vfs = pdfFonts.vfs;
+const API_URL = import.meta.env.VITE_API_URL;
+
 const useFileHandling = () => {
   const {
     setFile,
@@ -19,6 +21,26 @@ const useFileHandling = () => {
     setCustomTemplate
   } = useFileContext();
   const ALLOWED_FILE_EXTENSIONS = ['.xls', '.xlsx', '.csv'];
+
+  // Helper to upload the generated file (PDF or TXT) to backend
+  const uploadGeneratedFileToBackend = async (blob: Blob, fileName: string, email: string) => {
+    const formData = new FormData();
+    formData.append('file', new File([blob], fileName));
+    formData.append('email', email);
+    try {
+      const res = await fetch(`${API_URL}/api/files/upload`, {
+        method: 'POST',
+        body: formData,
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.message || 'Upload failed');
+      return data; // { url: 'https://cloudinary.com/...' }
+    } catch (err: unknown) {
+      const message = err instanceof Error ? err.message : 'File upload failed';
+      toast.error(message);
+      throw err;
+    }
+  };
 
   const handleFileSelected = (file: File) => {
     if (
@@ -47,7 +69,6 @@ const useFileHandling = () => {
           setHeaders(extractedHeaders);
           setTableData(jsonData);
           setTemplate('');
-          toast.success("File processed successfully!");
         }
       }
     };
@@ -68,46 +89,21 @@ const useFileHandling = () => {
     setProcessedData(processed);
   };
 
-  const downloadProcessedData = (format: 'txt' | 'pdf', pdfHeader?: string) => {
-    if (format === 'txt') {
-      const blob = new Blob([processedData.join('\n')], {
-        type: 'text/plain;charset=utf-8',
-      });
-      saveAs(blob, 'processed_data.txt');
-    } else {
-      const content = [
-        { text: pdfHeader || 'Processed Data', style: 'header' },
-        { text: '\n' }
-      ];
-      
-      processedData.forEach((data) => {
-        content.push({ text: data });
-        content.push({ text: '\n\n\n\n' }); // 4 spaces spacing
-      });
-
-      const docDefinition = {
-        content: content,
-        styles: {
-          header: {
-            fontSize: 18,
-            bold: true,
-            marginBottom: 10,
-          },
-        },
-      };
-
-      pdfMake.createPdf(docDefinition).download('processed_data.pdf');
-    }
-  };
-
-  const processAndDownload = (template: string, format: 'txt' | 'pdf', pdfHeader?: string, fileName?: string) => {
+  // Updated: Accept email and generate, upload, and return Cloudinary URL
+  const processAndDownload = async (
+    template: string,
+    format: 'txt' | 'pdf',
+    pdfHeader?: string,
+    fileName?: string,
+    email?: string
+  ): Promise<{ url?: string }> => {
     if (!template.trim()) {
       toast.error("Template is empty. Please write a template before downloading.");
-      return;
+      return {};
     }
     if (tableData.length === 0) {
       toast.error("No data available to process. Please upload a file.");
-      return;
+      return {};
     }
 
     const processed = tableData.map((row) => {
@@ -119,23 +115,24 @@ const useFileHandling = () => {
       return processedRow;
     });
 
+    let blob: Blob;
+    const downloadFileName = `${fileName || 'processed_data'}.${format}`;
+
     if (format === 'txt') {
-      const blob = new Blob([processed.join('\n\n')], {
+      blob = new Blob([processed.join('\n\n')], {
         type: 'text/plain;charset=utf-8',
       });
-      saveAs(blob, `${fileName || 'processed_data'}.txt`);
-      toast.success(`Successfully downloaded ${fileName || 'processed_data'}.txt`);
+      saveAs(blob, downloadFileName);
     } else {
       const content = [
         { text: pdfHeader || `${fileName || 'processed_data'} data`, style: 'header' },
         { text: '\n' }
       ];
-      
       processed.forEach((p) => {
         content.push({ text: p });
-        content.push({ text: '\n\n\n\n' }); // 4 spaces spacing
+        content.push({ text: '\n\n\n\n' });
+        content.push({text : '------------------------------'});
       });
-
       const docDefinition = {
         content: content,
         styles: {
@@ -146,15 +143,31 @@ const useFileHandling = () => {
           },
         },
       };
+      // Generate PDF as Blob
+      blob = await new Promise<Blob>((resolve) => {
+        pdfMake.createPdf(docDefinition).getBlob((pdfBlob: Blob) => {
+          saveAs(pdfBlob, downloadFileName);
+          resolve(pdfBlob);
+        });
+      });
+    }
 
-      pdfMake.createPdf(docDefinition).download(`${fileName || 'processed_data'}.pdf`);
-      toast.success(`Successfully downloaded ${fileName || 'processed_data'}.pdf`);
+    // Upload the generated file to backend and get Cloudinary URL
+    let url: string | undefined = undefined;
+    if (email) {
+      try {
+        const uploadRes = await uploadGeneratedFileToBackend(blob, downloadFileName, email);
+        url = uploadRes.file.url;
+      } catch {
+        // Error toast already shown in uploadGeneratedFileToBackend
+      }
     }
 
     // Also update the context
     setTemplate(template);
     setProcessedData(processed);
-  }
+    return { url };
+  };
 
   const handleResetData = () => {
     setCustomTemplate('');
@@ -170,9 +183,9 @@ const useFileHandling = () => {
     headers,
     processedData,
     handleTemplateSelected,
-    downloadProcessedData,
-    handleResetData,
     processAndDownload,
+    handleResetData,
   };
 };
+
 export default useFileHandling;

@@ -8,6 +8,7 @@ import { saveAs } from 'file-saver';
 import pdfMake from 'pdfmake/build/pdfmake';
 import pdfFonts from 'pdfmake/build/vfs_fonts';
 import { useNavigate } from 'react-router-dom';
+import { useEffect } from 'react';
 
 pdfMake.vfs = pdfFonts.vfs;
 
@@ -22,8 +23,13 @@ type HistoryEntry = {
 };
 
 export default function HistoryPage() {
-  const { history } = useHistory()
+  const { history, deleteHistory, fetchHistory } = useHistory()
   const navigate = useNavigate();
+
+  useEffect(() => {
+    fetchHistory();
+    
+  }, []);
 
   const handleDownload = (template: HistoryEntry) => {
     const fileName = template.fileName.replace(/\.[^/.]+$/, "");
@@ -56,9 +62,8 @@ export default function HistoryPage() {
     }
   }
 
-  const handleDelete = (templateId: string) => {
-    // Simulate delete
-    console.log(`Deleting template ${templateId}`)
+  const handleDelete = async (templateId: string) => {
+    await deleteHistory(templateId);
   }
 
   return (
@@ -70,7 +75,7 @@ export default function HistoryPage() {
 
       {/* Templates Grid */}
       <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
-        {history.map((template, index) => (
+        {history?.map((template, index) => (
           <Card
             key={template.id}
             className="bg-black/10 border-white/20 hover:bg-white/15 transition-all duration-300 transform hover:scale-105 animate-slide-up"
@@ -90,18 +95,18 @@ export default function HistoryPage() {
                   </div>
                   <div>
                     <CardTitle className="text-white text-lg">
-                      {template.fileName}
+                      {template?.fileName}
                     </CardTitle>
                     <div className="flex items-center space-x-1 text-gray-400 text-sm mt-1">
                       <Calendar className="w-3 h-3" />
-                      <span>{template.timestamp.toLocaleDateString()}</span>
+                      <span>{template?.timestamp.toLocaleDateString()}</span>
                     </div>
                   </div>
                 </div>
                 <Button
                   variant="ghost"
                   size="sm"
-                  onClick={() => handleDelete(template.id)}
+                  onClick={() => handleDelete(template?.id)}
                   className="text-gray-400 hover:text-red-400 hover:bg-red-500/10"
                 >
                   <Trash2 className="w-4 h-4" />
@@ -111,7 +116,7 @@ export default function HistoryPage() {
             <CardContent className="space-y-4">
               <div className="bg-white/5 rounded-lg p-3">
                 <p className="text-gray-300 text-sm line-clamp-2">
-                  {template.template}
+                  {template?.template}
                 </p>
                 {template.pdfHeader && (
                   <p className="text-gray-400 text-xs mt-2">

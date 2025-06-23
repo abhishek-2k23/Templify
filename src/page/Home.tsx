@@ -10,6 +10,7 @@ import useFileHandling from '../hooks/useFileHandling';
 import React from 'react';
 import { generateTemplate } from '../lib/gemini';
 import toast from 'react-hot-toast';
+import { useUser } from '@clerk/clerk-react';
 
 export default function HomePage() {
   const { headers, file, processedData } = useFileContext();
@@ -35,6 +36,7 @@ export default function HomePage() {
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const { addToHistory } = useHistory();
   const [isGenerating, setIsGenerating] = useState(false);
+  const { user } = useUser();
 
   // Set default PDF header when file is uploaded
   React.useEffect(() => {
@@ -132,17 +134,24 @@ export default function HomePage() {
     }, 0);
   };
 
-  const handleDownload = (format: 'txt' | 'pdf') => {
+  const handleDownload = async (format: 'txt' | 'pdf') => {
     const fileName = file ? file.name.replace(/\.[^/.]+$/, "") : 'processed_data';
-    processAndDownload(template, format, pdfHeader, fileName);
-    if (file) {
-      addToHistory({
-        fileName: file.name,
-        template: template,
-        processedData: processedData,
-        fileType: format,
-        pdfHeader: pdfHeader,
-      });
+    const email = user?.primaryEmailAddress?.emailAddress || user?.emailAddresses?.[0]?.emailAddress;
+    
+    try {
+      const { url } = await processAndDownload(template, format, pdfHeader, fileName, email);
+      
+      console.log('creating history', url);
+      if (url) {
+        await addToHistory({
+          url,
+          templateText: template,
+          fileType: format,
+          pdfHeader,
+        });
+      }
+    } catch (error) {
+      console.error('Error processing file:', error);
     }
   };
 
