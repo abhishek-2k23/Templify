@@ -1,4 +1,4 @@
-import { useState, useRef } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import { Button } from '../components/ui/button';
 import { Card, CardContent } from '../components/ui/card';
 import { Textarea } from '../components/ui/textarea';
@@ -11,6 +11,7 @@ import React from 'react';
 import { generateTemplate } from '../lib/gemini';
 import toast from 'react-hot-toast';
 import { useUser } from '@clerk/clerk-react';
+import { useSearchParams } from 'react-router-dom';
 
 export default function HomePage() {
   const { headers, file, template, setTemplate, pdfHeader, setPdfHeader, templateType, setTemplateType } = useFileContext();
@@ -34,6 +35,16 @@ export default function HomePage() {
   const { addToHistory } = useHistory();
   const [isGenerating, setIsGenerating] = useState(false);
   const { user } = useUser();
+  const [searchParams] = useSearchParams();
+
+  useEffect(() => {
+    const status = searchParams.get('status');
+    if (status === 'signed_in' || status === 'signed_up') {
+      toast.success('Welcome to Templify!');
+      // Clean the URL
+      window.history.replaceState(null, '', window.location.pathname);
+    }
+  }, [searchParams]);
 
   // Set default PDF header when file is uploaded
   React.useEffect(() => {

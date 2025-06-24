@@ -1,5 +1,6 @@
 import { useSignIn } from '@clerk/clerk-react';
 import { Link } from 'react-router-dom';
+import toast from 'react-hot-toast';
 import {
   Card,
   CardContent,
@@ -11,6 +12,7 @@ const SignIn = () => {
 
   const signInWithGoogle = () => {
     if (!isLoaded) return;
+    toast.loading('Signing in...');
     return signIn.authenticateWithRedirect({
       strategy: 'oauth_google',
       redirectUrl: '/sso-callback',
