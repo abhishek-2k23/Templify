@@ -10,10 +10,11 @@
     "preview": "vite preview"
   },
   "dependencies": {
-    "@clerk/clerk-react": "^5.32.0",
-    "@clerk/elements": "^0.23.33",
-    "@clerk/themes": "^2.2.50",
+    "@clerk/clerk-react": "^5.32.1",
+    "@clerk/elements": "^0.23.34",
+    "@clerk/themes": "^2.2.51",
     "@google/genai": "^1.6.0",
+    "@hookform/resolvers": "^5.1.1",
     "@radix-ui/react-label": "^2.1.1",
     "@radix-ui/react-slot": "^1.1.1",
     "@tabler/icons-react": "^3.26.0",
@@ -29,13 +30,15 @@
     "react": "^18.3.1",
     "react-dom": "^18.3.1",
     "react-dropzone": "^14.3.5",
+    "react-hook-form": "^7.58.1",
     "react-hot-toast": "^2.4.1",
     "react-icons": "^5.4.0",
     "react-router": "^7.0.2",
     "react-router-dom": "^7.0.2",
     "tailwind-merge": "^2.5.5",
     "tailwindcss-animate": "^1.0.7",
-    "xlsx": "^0.18.5"
+    "xlsx": "^0.18.5",
+    "zod": "^3.25.67"
   },
   "devDependencies": {
     "@eslint/js": "^9.15.0",

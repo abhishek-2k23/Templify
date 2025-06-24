@@ -131,7 +131,6 @@ const useFileHandling = () => {
       processed.forEach((p) => {
         content.push({ text: p });
         content.push({ text: '\n\n\n\n' });
-        content.push({text : '------------------------------'});
       });
       const docDefinition = {
         content: content,

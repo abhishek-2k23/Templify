@@ -9,17 +9,20 @@ importers:
   .:
     dependencies:
       '@clerk/clerk-react':
-        specifier: ^5.32.0
-        version: 5.32.0(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
+        specifier: ^5.32.1
+        version: 5.32.1(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
       '@clerk/elements':
-        specifier: ^0.23.33
-        version: 0.23.33(@types/react-dom@18.3.5(@types/react@18.3.17))(@types/react@18.3.17)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
+        specifier: ^0.23.34
+        version: 0.23.34(@types/react-dom@18.3.5(@types/react@18.3.17))(@types/react@18.3.17)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
       '@clerk/themes':
-        specifier: ^2.2.50
-        version: 2.2.50
+        specifier: ^2.2.51
+        version: 2.2.51
       '@google/genai':
         specifier: ^1.6.0
         version: 1.6.0
+      '@hookform/resolvers':
+        specifier: ^5.1.1
+        version: 5.1.1(react-hook-form@7.58.1(react@18.3.1))
       '@radix-ui/react-label':
         specifier: ^2.1.1
         version: 2.1.1(@types/react-dom@18.3.5(@types/react@18.3.17))(@types/react@18.3.17)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
@@ -65,6 +68,9 @@ importers:
       react-dropzone:
         specifier: ^14.3.5
         version: 14.3.5(react@18.3.1)
+      react-hook-form:
+        specifier: ^7.58.1
+        version: 7.58.1(react@18.3.1)
       react-hot-toast:
         specifier: ^2.4.1
         version: 2.4.1(csstype@3.1.3)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
@@ -86,6 +92,9 @@ importers:
       xlsx:
         specifier: ^0.18.5
         version: 0.18.5
+      zod:
+        specifier: ^3.25.67
+        version: 3.25.67
     devDependencies:
       '@eslint/js':
         specifier: ^9.15.0
@@ -225,15 +234,15 @@ packages:
     resolution: {integrity: sha512-vN5p+1kl59GVKMvTHt55NzzmYVxprfJD+ql7U9NFIfKCBkYE55LYtS+WtPlaYOyzydrKI8Nezd+aZextrd+FMA==}
     engines: {node: '>=6.9.0'}
 
-  '@clerk/clerk-react@5.32.0':
-    resolution: {integrity: sha512-RdipOVBdbUbFaDb8kF3EzhJw0eh5LPxSWWRTu4k+pOdRB1gzETiToLchj5nDWFkl8qW/uL4gQbZH+Pfc7izO0A==}
+  '@clerk/clerk-react@5.32.1':
+    resolution: {integrity: sha512-ByIukEdfqKirEp7dLIo3ohcAiFAXG6XFtwRSdA2Osv8K5rd0wuzHMFg1drj18fnyhAav0fd06r32iJxqGpC93Q==}
     engines: {node: '>=18.17.0'}
     peerDependencies:
       react: ^18.0.0 || ^19.0.0 || ^19.0.0-0
       react-dom: ^18.0.0 || ^19.0.0 || ^19.0.0-0
 
-  '@clerk/elements@0.23.33':
-    resolution: {integrity: sha512-ka9MrTG+wn0bHvBvzQvwYIZVASLCyuMXbVKwMWmOkpahoGtgsvTpttHmnHlvQvWUgYq56glQmiTntxRPTHqdfw==}
+  '@clerk/elements@0.23.34':
+    resolution: {integrity: sha512-DHhPPk3gmOQbfuQsOm9URIumokyWnxCEf7scKsb3cicSGIgotSaE9I8mOi3bjN6F3Iyofj6MqHAecxoU/3wU6A==}
     engines: {node: '>=18.17.0'}
     peerDependencies:
       next: ^13.5.4 || ^14.0.3 || ^15
@@ -243,8 +252,8 @@ packages:
       next:
         optional: true
 
-  '@clerk/shared@3.9.7':
-    resolution: {integrity: sha512-D3iuzuDoadK6BKb7qFZEH332z4Sl5mxLuHMf8rKdIMHuOu1RQK0RqFJtKPcFvDxq0RvJ9MC+rK24P2Sa2tOoNA==}
+  '@clerk/shared@3.9.8':
+    resolution: {integrity: sha512-gJwABXovbjtvP0ZVO9p5G+zYezyE3UFzvkVhbwsN/QBmwkwwGm7dbnH88HR9PY5MdlNE4feVamwg6WDwa841Vg==}
     engines: {node: '>=18.17.0'}
     peerDependencies:
       react: ^18.0.0 || ^19.0.0 || ^19.0.0-0
@@ -255,12 +264,12 @@ packages:
       react-dom:
         optional: true
 
-  '@clerk/themes@2.2.50':
-    resolution: {integrity: sha512-RsYE9rEw/RJcGvMhPsIiIhXvbZ6robNQdFswQW+Y0lKZB8mX9D+MilPt/T7KWbwmRdK7zQ2LgCLpveUQvxLu2A==}
+  '@clerk/themes@2.2.51':
+    resolution: {integrity: sha512-lcPwiN3zqgzBX5EddT5z0XWxUzpYS7FZY+6OoQ8zw4xyf/ub+GwAdzcXxYZTbrEKEJ5OpG+UX0qBKIbq5NUkzQ==}
     engines: {node: '>=18.17.0'}
 
-  '@clerk/types@4.60.1':
-    resolution: {integrity: sha512-Lbt0/Q9W9BJtGz1IITdmeqal7y1zp9EaxOEMvsTEDhOxKf/0F/M1d0gJmHEU0puQzYPp9zJsIWC2yJjbgy3Y3Q==}
+  '@clerk/types@4.61.0':
+    resolution: {integrity: sha512-SK58IsUIAmmgm8qg63raiZCXvpwKQobpA9/wCOfQj5GgN8CIEuCqGwqLGzk8xkYabLsLTACLs1l9bx38rLMMzQ==}
     engines: {node: '>=18.17.0'}
 
   '@esbuild/aix-ppc64@0.24.0':
@@ -461,6 +470,11 @@ packages:
     peerDependenciesMeta:
       '@modelcontextprotocol/sdk':
         optional: true
+
+  '@hookform/resolvers@5.1.1':
+    resolution: {integrity: sha512-J/NVING3LMAEvexJkyTLjruSm7aOFx7QX21pzkiJfMoNG0wl5aFEjLTl7ay7IQb9EWY6AkrBy7tHL2Alijpdcg==}
+    peerDependencies:
+      react-hook-form: ^7.55.0
 
   '@humanfs/core@0.19.1':
     resolution: {integrity: sha512-5DyQ4+1JEUzejeK1JGICcideyfUbGixgS9jNgex5nqkW+cY7WZhxBigmieN5Qnw9ZosSNVC9KQKyb+GUaGyKUA==}
@@ -745,6 +759,9 @@ packages:
     resolution: {integrity: sha512-ZvK2jBafvttJjoIdKm/Q/Bh7IJ1Ose9IBOwpOXcOvW3ikGTQGmKDgxTC6oCAzW6PynbkKP8+um1du81XJHZ0JA==}
     cpu: [x64]
     os: [win32]
+
+  '@standard-schema/utils@0.3.0':
+    resolution: {integrity: sha512-e7Mew686owMaPJVNNLs55PUvgz371nKgwsc4vxE49zsODpJEnxgxRo2y/OKrqueavXgZNMDVj3DdHFlaSAeU8g==}
 
   '@tabler/icons-react@3.26.0':
     resolution: {integrity: sha512-t18Zmu1ROktB7M8hWQ6vJw+mNpI/LPk5PPxLuE+kNB+4Zzf38GfETL8VF98inhzcfHohsggdROzMzwSAfjcAxw==}
@@ -1731,6 +1748,12 @@ packages:
     peerDependencies:
       react: '>= 16.8 || 18.0.0'
 
+  react-hook-form@7.58.1:
+    resolution: {integrity: sha512-Lml/KZYEEFfPhUVgE0RdCVpnC4yhW+PndRhbiTtdvSlQTL8IfVR+iQkBjLIvmmc6+GGoVeM11z37ktKFPAb0FA==}
+    engines: {node: '>=18.0.0'}
+    peerDependencies:
+      react: ^16.8.0 || ^17 || ^18 || ^19
+
   react-hot-toast@2.4.1:
     resolution: {integrity: sha512-j8z+cQbWIM5LY37pR6uZR6D4LfseplqnuAO4co4u8917hBUvXlEqyP1ZzqVLcqoyUesZZv/ImreoCeHVDpE5pQ==}
     engines: {node: '>=10'}
@@ -2228,19 +2251,19 @@ snapshots:
       '@babel/helper-string-parser': 7.25.9
       '@babel/helper-validator-identifier': 7.25.9
 
-  '@clerk/clerk-react@5.32.0(react-dom@18.3.1(react@18.3.1))(react@18.3.1)':
+  '@clerk/clerk-react@5.32.1(react-dom@18.3.1(react@18.3.1))(react@18.3.1)':
     dependencies:
-      '@clerk/shared': 3.9.7(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
-      '@clerk/types': 4.60.1
+      '@clerk/shared': 3.9.8(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
+      '@clerk/types': 4.61.0
       react: 18.3.1
       react-dom: 18.3.1(react@18.3.1)
       tslib: 2.8.1
 
-  '@clerk/elements@0.23.33(@types/react-dom@18.3.5(@types/react@18.3.17))(@types/react@18.3.17)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)':
+  '@clerk/elements@0.23.34(@types/react-dom@18.3.5(@types/react@18.3.17))(@types/react@18.3.17)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)':
     dependencies:
-      '@clerk/clerk-react': 5.32.0(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
-      '@clerk/shared': 3.9.7(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
-      '@clerk/types': 4.60.1
+      '@clerk/clerk-react': 5.32.1(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
+      '@clerk/shared': 3.9.8(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
+      '@clerk/types': 4.61.0
       '@radix-ui/primitive': 1.1.2
       '@radix-ui/react-form': 0.1.7(@types/react-dom@18.3.5(@types/react@18.3.17))(@types/react@18.3.17)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
       '@radix-ui/react-slot': 1.2.3(@types/react@18.3.17)(react@18.3.1)
@@ -2254,9 +2277,9 @@ snapshots:
       - '@types/react'
       - '@types/react-dom'
 
-  '@clerk/shared@3.9.7(react-dom@18.3.1(react@18.3.1))(react@18.3.1)':
+  '@clerk/shared@3.9.8(react-dom@18.3.1(react@18.3.1))(react@18.3.1)':
     dependencies:
-      '@clerk/types': 4.60.1
+      '@clerk/types': 4.61.0
       dequal: 2.0.3
       glob-to-regexp: 0.4.1
       js-cookie: 3.0.5
@@ -2266,12 +2289,12 @@ snapshots:
       react: 18.3.1
       react-dom: 18.3.1(react@18.3.1)
 
-  '@clerk/themes@2.2.50':
+  '@clerk/themes@2.2.51':
     dependencies:
-      '@clerk/types': 4.60.1
+      '@clerk/types': 4.61.0
       tslib: 2.8.1
 
-  '@clerk/types@4.60.1':
+  '@clerk/types@4.61.0':
     dependencies:
       csstype: 3.1.3
 
@@ -2425,6 +2448,11 @@ snapshots:
       - encoding
       - supports-color
       - utf-8-validate
+
+  '@hookform/resolvers@5.1.1(react-hook-form@7.58.1(react@18.3.1))':
+    dependencies:
+      '@standard-schema/utils': 0.3.0
+      react-hook-form: 7.58.1(react@18.3.1)
 
   '@humanfs/core@0.19.1': {}
 
@@ -2633,6 +2661,8 @@ snapshots:
 
   '@rollup/rollup-win32-x64-msvc@4.28.1':
     optional: true
+
+  '@standard-schema/utils@0.3.0': {}
 
   '@tabler/icons-react@3.26.0(react@18.3.1)':
     dependencies:
@@ -3625,6 +3655,10 @@ snapshots:
       attr-accept: 2.2.5
       file-selector: 2.1.2
       prop-types: 15.8.1
+      react: 18.3.1
+
+  react-hook-form@7.58.1(react@18.3.1):
+    dependencies:
       react: 18.3.1
 
   react-hot-toast@2.4.1(csstype@3.1.3)(react-dom@18.3.1(react@18.3.1))(react@18.3.1):
