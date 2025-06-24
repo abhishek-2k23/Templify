@@ -13,7 +13,7 @@ import toast from 'react-hot-toast';
 import { useUser } from '@clerk/clerk-react';
 
 export default function HomePage() {
-  const { headers, file, processedData } = useFileContext();
+  const { headers, file, template, setTemplate, pdfHeader, setPdfHeader, templateType, setTemplateType } = useFileContext();
   const { handleFileSelected, processAndDownload } = useFileHandling();
   const {
     handleDragLeave,
@@ -28,9 +28,6 @@ export default function HomePage() {
       handleFileSelected(selectedFile);
     },
   });
-  const [template, setTemplate] = useState('');
-  const [pdfHeader, setPdfHeader] = useState('');
-  const [templateType, setTemplateType] = useState('Invitation');
   const [showSuggestions, setShowSuggestions] = useState(false);
   const [filteredHeaders, setFilteredHeaders] = useState<string[]>([]);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
@@ -44,7 +41,7 @@ export default function HomePage() {
       const fileName = file.name.replace(/\.[^/.]+$/, ""); // Remove extension
       setPdfHeader(`${fileName} data`);
     }
-  }, [file]);
+  }, [file, setPdfHeader]);
 
   const handleGenerateTemplate = async () => {
     if (!template.trim()) {

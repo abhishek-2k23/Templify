@@ -4,66 +4,68 @@ import { Button } from "../components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "../components/ui/card"
 import { Download, FileText, Calendar, Trash2 } from "lucide-react"
 import { useHistory } from "../context/useHistory"
-import { saveAs } from 'file-saver';
-import pdfMake from 'pdfmake/build/pdfmake';
-import pdfFonts from 'pdfmake/build/vfs_fonts';
-import { useNavigate } from 'react-router-dom';
-import { useEffect } from 'react';
-
-pdfMake.vfs = pdfFonts.vfs;
+import { useNavigate, useLocation } from 'react-router-dom';
+import { useEffect, useRef } from 'react';
+import toast from 'react-hot-toast';
 
 type HistoryEntry = {
-  id: string;
-  fileName: string;
-  template: string;
-  processedData: string[];
-  timestamp: Date;
+  _id: string;
+  user: string;
+  url: string;
+  templateText: string;
   fileType: 'txt' | 'pdf';
   pdfHeader?: string;
+  createdAt: Date;
 };
 
 export default function HistoryPage() {
   const { history, deleteHistory, fetchHistory } = useHistory()
   const navigate = useNavigate();
+  const location = useLocation();
+  const hasFetched = useRef(false);
 
   useEffect(() => {
-    fetchHistory();
-    
-  }, []);
+    if (location.pathname === '/history' && !hasFetched.current) {
+      hasFetched.current = true;
+      const toastId = toast.loading('Fetching history...');
+      fetchHistory?.()
+        .then(() => toast.dismiss(toastId))
+        .catch(() => {
+          toast.dismiss(toastId);
+          toast.error('Failed to fetch history');
+        });
+    }
+  }, [location.pathname, fetchHistory]);
 
-  const handleDownload = (template: HistoryEntry) => {
-    const fileName = template.fileName.replace(/\.[^/.]+$/, "");
-    
-    if (template.fileType === 'txt') {
-      const blob = new Blob([template.processedData.join('\n\n')], {
-        type: 'text/plain;charset=utf-8',
-      });
-      saveAs(blob, `${fileName}.txt`);
-    } else {
-      const content = [
-        { text: template.pdfHeader || `${fileName} data`, style: 'header' },
-        { text: '\n' }
-      ];
-      template.processedData.forEach((data) => {
-        content.push({ text: data });
-        content.push({ text: '\n\n\n\n' });
-      });
-      const docDefinition = {
-        content: content,
-        styles: {
-          header: {
-            fontSize: 18,
-            bold: true,
-            marginBottom: 10,
-          },
-        },
-      };
-      pdfMake.createPdf(docDefinition).download(`${fileName}.pdf`);
+  const handleDownload = async (entry?: HistoryEntry) => {
+    if (!entry?.url) return;
+    try {
+      const link = document.createElement('a');
+      link.href = entry.url;
+      const urlParts = entry.url.split('/');
+      const fileName = urlParts[urlParts.length - 1] || `template.${entry.fileType ?? 'pdf'}`;
+      link.download = fileName;
+      link.target = '_blank';
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+    } catch (error) {
+      console.error('Error downloading file:', error);
+      window.open(entry?.url, '_blank');
     }
   }
 
-  const handleDelete = async (templateId: string) => {
-    await deleteHistory(templateId);
+  const handleDelete = async (entryId?: string) => {
+    if (!entryId) return;
+    const toastId = toast.loading('Deleting history...');
+    try {
+      await deleteHistory?.(entryId);
+      toast.dismiss(toastId);
+      toast.success('History deleted successfully');
+    } catch {
+      toast.dismiss(toastId);
+      toast.error('Failed to delete history');
+    }
   }
 
   return (
@@ -75,9 +77,9 @@ export default function HistoryPage() {
 
       {/* Templates Grid */}
       <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
-        {history?.map((template, index) => (
+        {history?.map?.((entry, index) => (
           <Card
-            key={template.id}
+            key={entry?._id ?? index}
             className="bg-black/10 border-white/20 hover:bg-white/15 transition-all duration-300 transform hover:scale-105 animate-slide-up"
             style={{ animationDelay: `${index * 0.1}s` }}
           >
@@ -86,7 +88,7 @@ export default function HistoryPage() {
                 <div className="flex items-center space-x-3">
                   <div
                     className={`p-2 rounded-lg ${
-                      template.fileType === 'pdf'
+                      entry?.fileType === 'pdf'
                         ? 'bg-red-500/20 text-red-400'
                         : 'bg-blue-500/20 text-blue-400'
                     }`}
@@ -95,18 +97,18 @@ export default function HistoryPage() {
                   </div>
                   <div>
                     <CardTitle className="text-white text-lg">
-                      {template?.fileName}
+                      Template {index + 1}
                     </CardTitle>
                     <div className="flex items-center space-x-1 text-gray-400 text-sm mt-1">
                       <Calendar className="w-3 h-3" />
-                      <span>{template?.timestamp.toLocaleDateString()}</span>
+                      <span>{entry?.createdAt?.toLocaleDateString?.()}</span>
                     </div>
                   </div>
                 </div>
                 <Button
                   variant="ghost"
                   size="sm"
-                  onClick={() => handleDelete(template?.id)}
+                  onClick={() => handleDelete(entry?._id)}
                   className="text-gray-400 hover:text-red-400 hover:bg-red-500/10"
                 >
                   <Trash2 className="w-4 h-4" />
@@ -116,24 +118,24 @@ export default function HistoryPage() {
             <CardContent className="space-y-4">
               <div className="bg-white/5 rounded-lg p-3">
                 <p className="text-gray-300 text-sm line-clamp-2">
-                  {template?.template}
+                  {entry?.templateText}
                 </p>
-                {template.pdfHeader && (
+                {entry?.pdfHeader && (
                   <p className="text-gray-400 text-xs mt-2">
-                    PDF Header: {template.pdfHeader}
+                    PDF Header: {entry?.pdfHeader}
                   </p>
                 )}
               </div>
               <div className="flex space-x-2">
                 <Button
-                  onClick={() => handleDownload(template)}
+                  onClick={() => handleDownload(entry)}
                   className="bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700 flex-1 transition-all duration-300"
                 >
                   <Download className="w-4 h-4 mr-2" />
                   Re-download
                 </Button>
                 <div className="bg-white/10 rounded px-3 py-2 text-white text-sm font-medium">
-                  {template.fileType.toUpperCase()}
+                  {entry?.fileType?.toUpperCase?.()}
                 </div>
               </div>
             </CardContent>
@@ -142,7 +144,7 @@ export default function HistoryPage() {
       </div>
 
       {/* Empty State */}
-      {history.length === 0 && (
+      {history?.length === 0 && (
         <div className="text-center py-16 animate-slide-up">
           <FileText className="w-16 h-16 text-white/40 mx-auto mb-4" />
           <h3 className="text-xl font-semibold text-white mb-2">No templates yet</h3>
