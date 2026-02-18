@@ -28,7 +28,21 @@ export default defineConfig({
         sizes: '512x512',
         type: 'image/png'
       }
-    ]
+    ],
+    screenshots: [
+          {
+            src: "/screenshots/mobile.jpg",
+            sizes: "390x844",
+            type: "image/jpg",
+            form_factor: "narrow",
+          },
+          {
+            src: "/screenshots/desktop.png",
+            sizes: "1366x768",
+            type: "image/png",
+            form_factor: "wide",
+          },
+        ]
   },
 
   workbox: {
