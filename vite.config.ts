@@ -19,12 +19,12 @@ export default defineConfig({
     theme_color: '#0f172a',
     icons: [
       {
-        src: '/icons/templify-192.png',
+        src: '/icons/templify_icon.png',
         sizes: '192x192',
         type: 'image/png'
       },
       {
-        src: '/icons/templify-512.png',
+        src: '/icons/templify_icon.png',
         sizes: '512x512',
         type: 'image/png'
       }
