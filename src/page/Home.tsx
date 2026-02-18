@@ -166,7 +166,7 @@ export default function HomePage() {
   return (
     <div className="max-w-4xl mx-auto p-6 space-y-8">
       <div className="text-center space-y-4 animate-slide-up">
-        <h1 className="text-4xl font-bold text-white">Create Your Template Test</h1>
+        <h1 className="text-4xl font-bold text-white">Create Your Template</h1>
         <p className="text-gray-300">
           Upload your spreadsheet and design your personalized template
         </p>
