@@ -70,6 +70,7 @@ export default defineConfig({
             urlPattern: ({ request }) => request.destination === "image",
             handler: "CacheFirst",
             options: {
+              cacheName: 'image-cache',
               expiration: {
                 maxEntries: 50,
                 maxAgeSeconds: 60 * 60 * 24 * 30,
